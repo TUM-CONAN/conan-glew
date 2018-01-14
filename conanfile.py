@@ -106,7 +106,7 @@ include(GNUInstallDirs)
                 self.copy(pattern="*.a", dst="lib", keep_path=False)
         else:
             if self.options.shared:
-                self.copy(pattern="*.so", dst="lib", keep_path=False)
+                self.copy(pattern="*.so*", dst="lib", keep_path=False)
             else:
                 self.copy(pattern="*.a", dst="lib", keep_path=False)
 
