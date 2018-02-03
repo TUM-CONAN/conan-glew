@@ -72,6 +72,8 @@ conan_basic_setup()
 include(GNUInstallDirs)
 """)
             cmake = CMake(self)
+            if self.settings.compiler == "clang":
+                cmake.definitions['SYSTEM'] = 'linux-clang'
             cmake.configure(source_dir="%s/build/cmake" % self.source_directory, defs={"BUILD_UTILS": "OFF"})
             cmake.build()
 
