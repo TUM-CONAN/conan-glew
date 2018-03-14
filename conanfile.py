@@ -61,6 +61,7 @@ include(GNUInstallDirs)
         cmake = CMake(self)
         if self.settings.compiler == "clang" and self.settings.os == "Linux":
             cmake.definitions['SYSTEM'] = 'linux-clang'
+        cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
         cmake.configure(source_dir="%s/build/cmake" % self.source_directory, defs={"BUILD_UTILS": "OFF"})
         cmake.build()
 
@@ -78,8 +79,8 @@ include(GNUInstallDirs)
                     self.copy(pattern="*32d.lib", dst="lib", keep_path=False)
                     self.copy(pattern="*.dll", dst="bin", keep_path=False)
                 else:
-                    self.copy(pattern="*32s.lib", dst="lib", keep_path=False)
-                    self.copy(pattern="*32sd.lib", dst="lib", keep_path=False)
+                    self.copy(pattern="lib*32.lib", dst="lib", keep_path=False)
+                    self.copy(pattern="lib*32d.lib", dst="lib", keep_path=False)
             else:
                 if self.options.shared:
                     self.copy(pattern="*32.dll.a", dst="lib", keep_path=False)
@@ -108,7 +109,7 @@ include(GNUInstallDirs)
 
             if self.settings.compiler == "Visual Studio":
                 if not self.options.shared:
-                    self.cpp_info.libs[0] += "s"
+                    self.cpp_info.libs[0] = "libglew32"
                     self.cpp_info.libs.append("OpenGL32.lib")
                     if self.settings.compiler.runtime != "MT":
                         self.cpp_info.exelinkflags.append('-NODEFAULTLIB:LIBCMTD')
