@@ -52,30 +52,17 @@ class GlewConan(ConanFile):
         os.unlink(zip_name)
 
     def build(self):
-        if self.settings.os == "Windows" and self.version == "master":
-            raise ConanException("Trunk builds are not supported on Windows (cannot build directly from master git repository).")
-
-        if self.settings.compiler == "Visual Studio":
-            env = VisualStudioBuildEnvironment(self)
-            with tools.environment_append(env.vars):
-                version = min(12, int(self.settings.compiler.version.value))
-                version = 10 if version == 11 else version
-                cd_build = "cd %s\\%s\\build\\vc%s" % (self.build_folder, self.source_directory, version)
-                build_command = build_sln_command(self.settings, "glew.sln")
-                vcvars = vcvars_command(self.settings)
-                self.run("%s && %s && %s" % (vcvars, cd_build, build_command.replace("x86", "Win32")))
-        else:
-            replace_in_file("%s/build/cmake/CMakeLists.txt" % self.source_directory, "include(GNUInstallDirs)",
+        replace_in_file("%s/build/cmake/CMakeLists.txt" % self.source_directory, "include(GNUInstallDirs)",
 """
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 include(GNUInstallDirs)
 """)
-            cmake = CMake(self)
-            if self.settings.compiler == "clang":
-                cmake.definitions['SYSTEM'] = 'linux-clang'
-            cmake.configure(source_dir="%s/build/cmake" % self.source_directory, defs={"BUILD_UTILS": "OFF"})
-            cmake.build()
+        cmake = CMake(self)
+        if self.settings.compiler == "clang" and self.settings.os == "Linux":
+            cmake.definitions['SYSTEM'] = 'linux-clang'
+        cmake.configure(source_dir="%s/build/cmake" % self.source_directory, defs={"BUILD_UTILS": "OFF"})
+        cmake.build()
 
     def package(self):
         find_glew_dir = "%s/build/conan" % self.build_folder if self.version == "master" else "."
